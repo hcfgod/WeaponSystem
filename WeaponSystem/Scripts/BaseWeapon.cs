@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public abstract class BaseWeapon : MonoBehaviour, IWeapon
 {
@@ -23,8 +21,16 @@ public abstract class BaseWeapon : MonoBehaviour, IWeapon
 	{
 		
 	}
-	
-	public string GetWeaponName()
+
+    public void SetWeaponAttributes(string name, int minDamage, int maxDamage, float range)
+    {
+        _weaponName = name;
+        _minDamage = minDamage;
+        _maxDamage = maxDamage;
+        _range = range;
+    }
+
+    public string GetWeaponName()
 	{ return _weaponName; }
 	
 	public void SetWeaponName(string weaponName)

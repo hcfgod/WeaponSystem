@@ -6,6 +6,20 @@ public class WeaponManager : MonoBehaviour
 {
 	public IWeapon CurrentWeapon { get; set; }
 
+
+	private void Start()
+	{
+		SwitchWeapon(FindObjectOfType<RangedWeapon>());
+	}
+	
+	private void Update()
+	{
+		if(Input.GetMouseButtonDown(0))
+		{
+			FireCurrentWeapon();
+		}
+	}
+	
 	public void SwitchWeapon(IWeapon newWeapon)
 	{
 		CurrentWeapon?.Unequip();
