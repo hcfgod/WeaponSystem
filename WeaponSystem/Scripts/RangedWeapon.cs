@@ -1,17 +1,43 @@
 ﻿using UnityEngine;
 
-public class RangedWeapon : BaseWeapon
+public class RangedWeapon : BaseGun
 {
-	public IFiringMode FiringMode { get; set; }
+	private IProjectileType _projectileType;
+	private IFiringMode _firingMode;
 
-    private void Start()
-    {
-        // Initialize with SingleShot as default
-        FiringMode = GetComponent<SingleShot>();
-    }
+	private void Awake()
+	{
+		_projectileType = GetComponent<IProjectileType>();
+		
+		switch(ProjectileType)
+		{
+			case EProjectileType.Projectile:
+				_projectileType = GetComponent<PhysicalProjectile>();
+			break;
+			
+			case EProjectileType.Raycast:
+				_projectileType = GetComponent<RaycastProjectile>();
+			break;
+		}
+		
+		switch(FireMode)
+		{
+			case EFireMode.Auto:
+				_firingMode = GetComponent<SingleShot>();
+			break;
+				
+			case EFireMode.Single:
+				_firingMode = GetComponent<SingleShot>();
+			break;
+				
+			case EFireMode.Burst:
+				_firingMode = GetComponent<SingleShot>();
+			break;
+		}
+	}
 
-    public override void Attack()
-    {
-        FiringMode?.ExecuteFiringSequence();
-    }
+	public override void Shoot()
+	{
+		_firingMode.ExecuteFiringSequence(_projectileType);
+	}
 }

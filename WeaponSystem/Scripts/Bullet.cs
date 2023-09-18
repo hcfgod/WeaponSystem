@@ -1,10 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Bullet : MonoBehaviour
 {
-	Rigidbody bulletRigidBody;
+	public UnityEvent2 OnBulletHit;
+	private Rigidbody bulletRigidBody;
 	
 	private void Awake()
 	{
@@ -18,5 +20,7 @@ public class Bullet : MonoBehaviour
 			
 		bulletRigidBody.velocity = Vector3.zero;
 		gameObject.SetActive(false);
+		
+		OnBulletHit?.Invoke();
 	}
 }
