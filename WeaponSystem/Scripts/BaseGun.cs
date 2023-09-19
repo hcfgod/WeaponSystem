@@ -18,6 +18,12 @@ public class BaseGun : BaseWeapon
 		InitializeProjectileType();
 		InitializeFiringMode();
 	}
+	
+	private void OnValidate()
+	{
+		InitializeProjectileType();
+		InitializeFiringMode();
+	}
 
 	public override void Attack()
 	{
@@ -26,7 +32,7 @@ public class BaseGun : BaseWeapon
 
 	public virtual void Shoot()
 	{
-		_firingMode.ExecuteFiringSequence(_projectileType);
+		_firingMode.ExecuteFiringSequence(WeaponData, _projectileType);
 	}
 
 	public void SwitchFireMode(EFireMode newFireMode)
@@ -37,25 +43,64 @@ public class BaseGun : BaseWeapon
 
 	private void InitializeProjectileType()
 	{
+		#if UNITY_EDITOR
+		
+		if (_firingMode != null)
+		{
+			DestroyImmediate(_projectileType as MonoBehaviour);
+		}
+		
+		#endif
+		
+		#if !UNITY_EDITOR
+		
+		// Remove the old firing mode component if it exists
+		if (_projectileType != null)
+		{
+			Destroy(_projectileType as MonoBehaviour);
+		}
+		
+		#endif
+
+
 		// Initialize ProjectileType based on the enum
 		switch (ProjectileType)
 		{
 			case EProjectileType.Projectile:
 				_projectileType = GetComponent<PhysicalProjectile>();
+				
+				if(_projectileType == null)
+					_projectileType = gameObject.AddComponent<PhysicalProjectile>();
 				break;
 			case EProjectileType.Raycast:
-				_projectileType = GetComponent<RaycastProjectile>();
+				_projectileType = gameObject.AddComponent<RaycastProjectile>();
+				
+				if(_projectileType == null)
+					_projectileType = gameObject.AddComponent<RaycastProjectile>();
 				break;
 		}
 	}
 
 	private void InitializeFiringMode()
 	{
-		// Remove the old firing mode component if it exists
+		#if UNITY_EDITOR
+		
 		if (_firingMode != null)
 		{
-			Destroy(_firingMode as MonoBehaviour);
+			DestroyImmediate(_firingMode as MonoBehaviour);
 		}
+		
+		#endif
+		
+	    #if !UNITY_EDITOR
+		
+		// Remove the old firing mode component if it exists
+		if (_projectileType != null)
+		{
+			Destroy(_projectileType as MonoBehaviour);
+		}
+		
+		#endif
 
 		// Initialize FiringMode based on the enum
 		switch (FireMode)

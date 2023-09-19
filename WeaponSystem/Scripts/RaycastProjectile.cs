@@ -4,11 +4,23 @@ using UnityEngine;
 
 public class RaycastProjectile : MonoBehaviour, IProjectileType
 {
-	public float range = 100f;
-	public int damage = 10;
+	[SerializeField] private Camera _camera;
+	
+	[SerializeField] private LayerMask _hitLayers; // Layers that the raycast can hit
 
-	public void Fire()
+	public void Fire(WeaponData weaponData)
 	{
-		// Raycasting logic here
+		RaycastHit hit;
+		Vector3 start = _camera.transform.position;
+		Vector3 direction = _camera.transform.forward;
+
+		if (Physics.Raycast(start, direction, out hit, weaponData.Range, _hitLayers))
+		{
+			if(hit.transform.CompareTag("Player"))
+				return;
+				
+			// We hit something
+			Debug.Log("Hit: " + hit.collider.name);
+		}
 	}
 }

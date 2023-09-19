@@ -1,4 +1,4 @@
 ﻿public interface IFiringMode
 {
-	void ExecuteFiringSequence(IProjectileType projectileType);
+	void ExecuteFiringSequence(WeaponData weaponData, IProjectileType projectileType);
 }

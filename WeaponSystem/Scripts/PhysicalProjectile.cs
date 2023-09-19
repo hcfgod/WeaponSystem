@@ -24,7 +24,7 @@ public class PhysicalProjectile : MonoBehaviour, IProjectileType
 		}
 	}
 	
-	public void Fire()
+	public void Fire(WeaponData weaponData)
 	{
 		if (bulletPool.Count == 0) return; // No bullets available in the pool
 

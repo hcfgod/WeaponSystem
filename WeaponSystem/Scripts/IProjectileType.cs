@@ -4,5 +4,5 @@ using UnityEngine;
 
 public interface IProjectileType
 {
-	void Fire();
+	void Fire(WeaponData weaponData);
 }

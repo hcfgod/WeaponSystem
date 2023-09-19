@@ -2,8 +2,8 @@
 
 public class SingleShot : MonoBehaviour, IFiringMode
 {
-	public void ExecuteFiringSequence(IProjectileType projectileType)
+	public void ExecuteFiringSequence(WeaponData weaponData, IProjectileType projectileType)
 	{
-		projectileType.Fire();
+		projectileType.Fire(weaponData);
 	}
 }
