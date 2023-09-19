@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class WeaponManager : MonoBehaviour
 {
@@ -14,11 +15,9 @@ public class WeaponManager : MonoBehaviour
 	
 	private void Update()
 	{
-		if(Input.GetMouseButtonDown(0))
-		{
-			FireCurrentWeapon();
-		}
+		HandleGunInput();
 	}
+	
 	
 	public void SwitchWeapon(IWeapon newWeapon)
 	{
@@ -30,5 +29,36 @@ public class WeaponManager : MonoBehaviour
 	public void FireCurrentWeapon()
 	{
 		CurrentWeapon?.Attack();
+	}
+	
+	public System.Type GetCurrentWeaponType()
+	{
+		if (CurrentWeapon == null)
+		{
+			return null;
+		}
+        
+		return CurrentWeapon.GetType();
+	}
+	
+	private void HandleGunInput()
+	{
+		if (CurrentWeapon is BaseGun gun)
+		{
+			if (gun.FireModeEnum == EFireMode.Auto)
+			{
+				if (Input.GetMouseButton(0))
+				{
+					CurrentWeapon.Attack();
+				}
+			}
+			else if(gun.FireModeEnum == EFireMode.Single)
+			{
+				if (Input.GetMouseButtonDown(0))
+				{
+					CurrentWeapon.Attack();
+				}
+			}
+		}
 	}
 }

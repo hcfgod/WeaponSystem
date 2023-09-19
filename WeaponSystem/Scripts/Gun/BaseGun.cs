@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public enum EProjectileType { Raycast, Projectile };
 	
@@ -8,6 +9,19 @@ public enum EFireMode { Single, Burst, Auto };
 
 public class BaseGun : BaseWeapon
 {
+	#region Events
+	
+	public UnityEvent2 OnWeaponFiredUnityEvent;
+	public UnityEvent2 OnWeaponFireModeSwitchedUnityEvent;
+	
+	public delegate void WeaponFiredEventHandler();
+	public delegate void WeaponFireModeSwitched();
+
+	public event WeaponFiredEventHandler OnWeaponFired;
+	public event WeaponFireModeSwitched OnWeaponFireModeSwitched;
+
+	#endregion
+	
 	public GunData GunDataRef;
 	
 	public EProjectileType ProjectileTypeEnum = EProjectileType.Raycast;
@@ -61,15 +75,20 @@ public class BaseGun : BaseWeapon
 		}
 		
 		_firingMode.ExecuteFiringSequence(WeaponDataRef, GunDataRef, _projectileType);
+		
+		OnWeaponFired?.DynamicInvoke();
+		OnWeaponFiredUnityEvent?.Invoke();
 	}
 
 	public void SwitchFireMode(EFireMode newFireMode)
 	{
 		FireModeEnum = newFireMode;
 		InitializeFiringMode();
+		
+		OnWeaponFireModeSwitched?.DynamicInvoke();
+		OnWeaponFireModeSwitchedUnityEvent?.Invoke();
 	}
 	
-
 	#region Util Methods
 	
 	private void InitializeProjectileType()

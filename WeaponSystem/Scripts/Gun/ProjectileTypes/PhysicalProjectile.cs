@@ -4,15 +4,22 @@ using UnityEngine;
 
 public class PhysicalProjectile : MonoBehaviour, IProjectileType
 {
+	[SerializeField] private GameObject playerRoot;
+	
 	public GameObject bulletPrefab;
 	public Transform bulletSpawnPoint;
 	public float bulletSpeed = 30f;
 	public int poolSize = 20; // Size of the bullet pool
 	
 	private Queue<GameObject> bulletPool;
-
+	
+	private List<Transform> _ignoreTransforms;
+	
 	private void Awake()
 	{
+		// Initialize the list of transforms to ignore
+		_ignoreTransforms = ComponentUtils.CollectAllTransforms(playerRoot.transform);
+		
 		// Check if bulletPrefab and bulletSpawnPoint are set
 		if (bulletPrefab == null || bulletSpawnPoint == null)
 		{
@@ -25,9 +32,11 @@ public class PhysicalProjectile : MonoBehaviour, IProjectileType
 
 		for (int i = 0; i < poolSize; i++)
 		{
-			GameObject bullet = Instantiate(bulletPrefab, transform);
-			bullet.SetActive(false);
-			bulletPool.Enqueue(bullet);
+			GameObject bulletObject = Instantiate(bulletPrefab, transform);
+			Bullet bullet = bulletObject.AddComponent<Bullet>();
+			bullet.IgnoreTransforms = _ignoreTransforms;
+			bulletObject.SetActive(false);
+			bulletPool.Enqueue(bulletObject);
 		}
 	}
 	
