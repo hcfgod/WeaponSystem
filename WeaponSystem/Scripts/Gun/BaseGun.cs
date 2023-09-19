@@ -2,42 +2,44 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using System;
 
 public enum EProjectileType { Raycast, Projectile };
 	
 public enum EFireMode { Single, Burst, Auto };
 
+public enum EAmmoBehavior { Realistic, CallOfDuty };
+
 public class BaseGun : BaseWeapon
 {
 	#region Events
 	
-	public UnityEvent2 OnWeaponFiredUnityEvent;
-	public UnityEvent2 OnWeaponFireModeSwitchedUnityEvent;
-	
-	public delegate void WeaponFiredEventHandler();
+	public UnityEvent2 OnWeaponFireModeSwitchedUnityEvent;	
 	public delegate void WeaponFireModeSwitched();
-
-	public event WeaponFiredEventHandler OnWeaponFired;
 	public event WeaponFireModeSwitched OnWeaponFireModeSwitched;
-
+	
 	#endregion
 	
 	public GunData GunDataRef;
+	public AmmoData AmmoDataRef;
 	
 	public EProjectileType ProjectileTypeEnum = EProjectileType.Raycast;
 	public EFireMode FireModeEnum = EFireMode.Single;
+	public EAmmoBehavior AmmoBehaviorEnum = EAmmoBehavior.Realistic;
 		
 	private EFireMode _previousFireModeEnum;
 	private EProjectileType _previousProjectileTypeEnum;
+	private EAmmoBehavior _previousAmmoBehaviorEnum;
 	
 	protected IProjectileType _projectileType;
 	protected IFiringMode _firingMode;
-
+	protected IAmmoBehavior _ammoBehavior;
 	
 	private void Awake()
 	{
 		InitializeFiringMode();
 		InitializeProjectileType();
+		InitializeAmmoBehaviour();
 	}
 	
 	private void OnValidate()
@@ -52,6 +54,12 @@ public class BaseGun : BaseWeapon
 		{
 			InitializeProjectileType();
 			_previousProjectileTypeEnum = ProjectileTypeEnum;
+		}
+		
+		if (AmmoBehaviorEnum != _previousAmmoBehaviorEnum)
+		{
+			InitializeAmmoBehaviour();
+			_previousAmmoBehaviorEnum = AmmoBehaviorEnum;
 		}
 	}
 
@@ -74,10 +82,12 @@ public class BaseGun : BaseWeapon
 			return;
 		}
 		
-		_firingMode.ExecuteFiringSequence(WeaponDataRef, GunDataRef, _projectileType);
+		if (!_ammoBehavior.CanShoot())
+		{
+			return;
+		}
 		
-		OnWeaponFired?.DynamicInvoke();
-		OnWeaponFiredUnityEvent?.Invoke();
+		_firingMode.ExecuteFiringSequence(WeaponDataRef, GunDataRef, _projectileType);
 	}
 
 	public void SwitchFireMode(EFireMode newFireMode)
@@ -164,7 +174,42 @@ public class BaseGun : BaseWeapon
 		ComponentUtils.RemoveDuplicateComponents<IFiringMode>(gameObject);
 	}
 	
-	private System.Type GetFiringModeTypeFromEnum()
+	private void InitializeAmmoBehaviour()
+	{
+		System.Type expectedType = GetAmmoBehaviourFromEnum();
+
+		// Remove components that don't match the enum
+		foreach (MonoBehaviour component in GetComponents<MonoBehaviour>())
+		{
+			if (component is IAmmoBehavior && component.GetType() != expectedType)
+			{
+	            #if UNITY_EDITOR
+				DestroyImmediate(component);
+	            #else
+				Destroy(component);
+	            #endif
+			}
+		}
+
+		// Initialize FiringMode based on the enum
+		if (expectedType == typeof(RealisticAmmo))
+		{
+			_ammoBehavior = ComponentUtils.AddOrGetComponent<RealisticAmmo>(gameObject);
+		}
+		// Uncomment these lines when you have the corresponding classes
+		// else if (expectedType == typeof(CallOfDuty))
+		// {
+		//     _firingMode = AddOrGetComponent<Burst>();
+		// }
+		else
+		{
+			Debug.LogError("Unsupported Ammo Behaviour: " + AmmoBehaviorEnum);
+		}
+
+		ComponentUtils.RemoveDuplicateComponents<IFiringMode>(gameObject);
+	}
+	
+	private Type GetFiringModeTypeFromEnum()
 	{
 		switch (FireModeEnum)
 		{
@@ -179,7 +224,7 @@ public class BaseGun : BaseWeapon
 		}
 	}
 
-	private System.Type GetProjectileTypeFromEnum()
+	private Type GetProjectileTypeFromEnum()
 	{
 		switch (ProjectileTypeEnum)
 		{
@@ -189,6 +234,21 @@ public class BaseGun : BaseWeapon
 			return typeof(PhysicalProjectile);
 		default:
 			return null;
+		}
+	}
+	
+	private Type GetAmmoBehaviourFromEnum()
+	{
+		switch (AmmoBehaviorEnum)
+		{
+			case EAmmoBehavior.Realistic:
+				return typeof(RealisticAmmo);
+			
+			case EAmmoBehavior.CallOfDuty:
+				//return typeof(RealisticAmmo);
+				
+			default:
+				return null;
 		}
 	}
 	

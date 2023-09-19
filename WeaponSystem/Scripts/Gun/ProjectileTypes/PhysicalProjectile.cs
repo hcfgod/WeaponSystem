@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class PhysicalProjectile : MonoBehaviour, IProjectileType
-{
+{	
 	[SerializeField] private GameObject playerRoot;
 	
 	public GameObject bulletPrefab;
