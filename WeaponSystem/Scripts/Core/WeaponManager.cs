@@ -18,7 +18,6 @@ public class WeaponManager : MonoBehaviour
 		HandleGunInput();
 	}
 	
-	
 	public void SwitchWeapon(IWeapon newWeapon)
 	{
 		CurrentWeapon?.Unequip();
@@ -58,6 +57,11 @@ public class WeaponManager : MonoBehaviour
 				{
 					CurrentWeapon.Attack();
 				}
+			}
+			
+			if(Input.GetKeyDown(KeyCode.R))
+			{
+				gun.AmmoBehavior.Reload();
 			}
 		}
 	}

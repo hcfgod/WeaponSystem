@@ -21,7 +21,7 @@ public class BaseGun : BaseWeapon
 	#endregion
 	
 	public GunData GunDataRef;
-	public AmmoData AmmoDataRef;
+	public AmmoBehaviorData AmmoBehaviorDataRef;
 	
 	public EProjectileType ProjectileTypeEnum = EProjectileType.Raycast;
 	public EFireMode FireModeEnum = EFireMode.Single;
@@ -34,6 +34,7 @@ public class BaseGun : BaseWeapon
 	protected IProjectileType _projectileType;
 	protected IFiringMode _firingMode;
 	protected IAmmoBehavior _ammoBehavior;
+	public IAmmoBehavior AmmoBehavior { get { return _ammoBehavior; } }
 	
 	private void Awake()
 	{
@@ -192,9 +193,9 @@ public class BaseGun : BaseWeapon
 		}
 
 		// Initialize FiringMode based on the enum
-		if (expectedType == typeof(RealisticAmmo))
+		if (expectedType == typeof(RealisticAmmoBehavior))
 		{
-			_ammoBehavior = ComponentUtils.AddOrGetComponent<RealisticAmmo>(gameObject);
+			_ammoBehavior = ComponentUtils.AddOrGetComponent<RealisticAmmoBehavior>(gameObject);
 		}
 		// Uncomment these lines when you have the corresponding classes
 		// else if (expectedType == typeof(CallOfDuty))
@@ -242,7 +243,7 @@ public class BaseGun : BaseWeapon
 		switch (AmmoBehaviorEnum)
 		{
 			case EAmmoBehavior.Realistic:
-				return typeof(RealisticAmmo);
+				return typeof(RealisticAmmoBehavior);
 			
 			case EAmmoBehavior.CallOfDuty:
 				//return typeof(RealisticAmmo);
