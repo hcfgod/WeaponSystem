@@ -2,7 +2,7 @@
 
 public abstract class BaseWeapon : MonoBehaviour, IWeapon
 {
-	public WeaponData WeaponData;
+	public WeaponData WeaponDataRef;
 
 	public virtual void Attack()
 	{

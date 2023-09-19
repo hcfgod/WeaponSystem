@@ -8,6 +8,8 @@ public enum EFireMode { Single, Burst, Auto };
 
 public class BaseGun : BaseWeapon
 {
+	public GunData GunDataRef;
+	
 	public EProjectileType ProjectileTypeEnum = EProjectileType.Raycast;
 	public EFireMode FireModeEnum = EFireMode.Single;
 		
@@ -58,7 +60,7 @@ public class BaseGun : BaseWeapon
 			return;
 		}
 		
-		_firingMode.ExecuteFiringSequence(WeaponData, _projectileType);
+		_firingMode.ExecuteFiringSequence(WeaponDataRef, GunDataRef, _projectileType);
 	}
 
 	public void SwitchFireMode(EFireMode newFireMode)
@@ -126,11 +128,11 @@ public class BaseGun : BaseWeapon
 		{
 			_firingMode = ComponentUtils.AddOrGetComponent<SingleShot>(gameObject);
 		}
+		else if (expectedType == typeof(FullAuto))
+		 {
+			_firingMode = ComponentUtils.AddOrGetComponent<FullAuto>(gameObject);
+		 }
 		// Uncomment these lines when you have the corresponding classes
-		// else if (expectedType == typeof(Automatic))
-		// {
-		//     _firingMode = AddOrGetComponent<Automatic>();
-		// }
 		// else if (expectedType == typeof(Burst))
 		// {
 		//     _firingMode = AddOrGetComponent<Burst>();
@@ -148,7 +150,7 @@ public class BaseGun : BaseWeapon
 		switch (FireModeEnum)
 		{
 		case EFireMode.Auto:
-			//return typeof(Automatic);
+			return typeof(FullAuto);
 		case EFireMode.Single:
 			return typeof(SingleShot);
 		case EFireMode.Burst:
