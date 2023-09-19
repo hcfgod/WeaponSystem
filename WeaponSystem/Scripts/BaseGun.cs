@@ -10,19 +10,25 @@ public class BaseGun : BaseWeapon
 	public EFireMode FireMode = EFireMode.Single;
 	public EProjectileType ProjectileType = EProjectileType.Projectile;
 
+	private EFireMode previousFireMode;
+	private EProjectileType previousProjectileType;
+	
 	protected IProjectileType _projectileType;
 	protected IFiringMode _firingMode;
 
-	private void Awake()
-	{
-		InitializeProjectileType();
-		InitializeFiringMode();
-	}
-	
 	private void OnValidate()
 	{
-		InitializeProjectileType();
-		InitializeFiringMode();
+		if (FireMode != previousFireMode)
+		{
+			InitializeFiringMode();
+			previousFireMode = FireMode;
+		}
+
+		if (ProjectileType != previousProjectileType)
+		{
+			InitializeProjectileType();
+			previousProjectileType = ProjectileType;
+		}
 	}
 
 	public override void Attack()
@@ -45,39 +51,32 @@ public class BaseGun : BaseWeapon
 	{
 		#if UNITY_EDITOR
 		
-		if (_firingMode != null)
+		if (_projectileType != null)
 		{
 			DestroyImmediate(_projectileType as MonoBehaviour);
 		}
 		
 		#endif
 		
-		#if !UNITY_EDITOR
-		
-		// Remove the old firing mode component if it exists
+	    #if !UNITY_EDITOR
+
 		if (_projectileType != null)
 		{
 			Destroy(_projectileType as MonoBehaviour);
 		}
 		
 		#endif
-
-
+		
 		// Initialize ProjectileType based on the enum
 		switch (ProjectileType)
 		{
 			case EProjectileType.Projectile:
-				_projectileType = GetComponent<PhysicalProjectile>();
-				
-				if(_projectileType == null)
-					_projectileType = gameObject.AddComponent<PhysicalProjectile>();
-				break;
+				_projectileType = AddOrGetComponent<PhysicalProjectile>();
+			break;
+			
 			case EProjectileType.Raycast:
-				_projectileType = gameObject.AddComponent<RaycastProjectile>();
-				
-				if(_projectileType == null)
-					_projectileType = gameObject.AddComponent<RaycastProjectile>();
-				break;
+				_projectileType = AddOrGetComponent<RaycastProjectile>();
+			break;
 		}
 	}
 
@@ -95,9 +94,9 @@ public class BaseGun : BaseWeapon
 	    #if !UNITY_EDITOR
 		
 		// Remove the old firing mode component if it exists
-		if (_projectileType != null)
+		if (_firingMode != null)
 		{
-			Destroy(_projectileType as MonoBehaviour);
+		Destroy(_firingMode as MonoBehaviour);
 		}
 		
 		#endif
@@ -105,16 +104,29 @@ public class BaseGun : BaseWeapon
 		// Initialize FiringMode based on the enum
 		switch (FireMode)
 		{
-		case EFireMode.Auto:
-			//_firingMode = gameObject.AddComponent<Automatic>();
+			case EFireMode.Auto:
+				//_firingMode = AddOrGetComponent<Automatic>();
 			break;
-		case EFireMode.Single:
-			_firingMode = gameObject.AddComponent<SingleShot>();
+				
+			case EFireMode.Single:
+				_firingMode = AddOrGetComponent<SingleShot>();
 			break;
-		case EFireMode.Burst:
-			//_firingMode = gameObject.AddComponent<Burst>();
+				
+			case EFireMode.Burst:
+				//_firingMode = AddOrGetComponent<Burst>();
 			break;
-			// Add more cases as you implement more firing modes
 		}
+	}
+	
+	private T AddOrGetComponent<T>() where T : MonoBehaviour, new()
+	{
+		T component = GetComponent<T>();
+    
+		if (component == null)
+		{
+			component = gameObject.AddComponent<T>();
+		}
+    
+		return component;
 	}
 }
