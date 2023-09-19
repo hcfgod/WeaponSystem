@@ -13,6 +13,13 @@ public class PhysicalProjectile : MonoBehaviour, IProjectileType
 
 	private void Awake()
 	{
+		// Check if bulletPrefab and bulletSpawnPoint are set
+		if (bulletPrefab == null || bulletSpawnPoint == null)
+		{
+			Debug.LogError("Bullet Prefab or Bullet Spawn Point is not set.");
+			return;
+		}
+		
 		// Initialize the bullet pool
 		bulletPool = new Queue<GameObject>();
 
@@ -26,6 +33,13 @@ public class PhysicalProjectile : MonoBehaviour, IProjectileType
 	
 	public void Fire(WeaponData weaponData)
 	{
+		// Check if weaponData is null or contains invalid data
+		if (weaponData == null)
+		{
+			Debug.LogError("Weapon Data is null.");
+			return;
+		}
+		
 		if (bulletPool.Count == 0) return; // No bullets available in the pool
 
 		// Dequeue a bullet from the pool
@@ -34,11 +48,14 @@ public class PhysicalProjectile : MonoBehaviour, IProjectileType
 		bullet.transform.rotation = bulletSpawnPoint.rotation;
 		bullet.SetActive(true);
 
-		// Apply force to the bullet
 		Rigidbody rb = bullet.GetComponent<Rigidbody>();
+		if (rb == null)
+		{
+			Debug.LogError("Rigidbody not found on bullet prefab.");
+			return;
+		}
+		
 		rb.velocity = bulletSpeed * bulletSpawnPoint.forward;
-
-		// Enqueue the bullet back into the pool after some time
 		StartCoroutine(DeactivateAndEnqueueBullet(bullet, 2.0f));
 	}
 	

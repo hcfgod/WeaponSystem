@@ -6,9 +6,9 @@ public class WeaponManager : MonoBehaviour
 {
 	public IWeapon CurrentWeapon { get; set; }
 
-
 	private void Start()
 	{
+		// Temp Setting The Current Weapon To A Test Weapon For Testing Purposes
 		SwitchWeapon(FindObjectOfType<RangedWeapon>());
 	}
 	
