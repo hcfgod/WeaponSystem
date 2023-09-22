@@ -5,6 +5,8 @@ using UnityEngine.Events;
 
 public class PhysicalProjectile : MonoBehaviour, IProjectileType
 {	
+	public UnityEvent2 OnTargetHitUnityEvent;
+	
 	[SerializeField] private GameObject playerRoot;
 	
 	public GameObject bulletPrefab;
@@ -35,6 +37,7 @@ public class PhysicalProjectile : MonoBehaviour, IProjectileType
 		{
 			GameObject bulletObject = Instantiate(bulletPrefab, transform);
 			Bullet bullet = bulletObject.AddComponent<Bullet>();
+			bullet.OnTargetHit += TargetHit;
 			bullet.IgnoreTransforms = _ignoreTransforms;
 			bulletObject.SetActive(false);
 			bulletPool.Enqueue(bulletObject);
@@ -59,6 +62,7 @@ public class PhysicalProjectile : MonoBehaviour, IProjectileType
 		bullet.SetActive(true);
 
 		Rigidbody rb = bullet.GetComponent<Rigidbody>();
+		
 		if (rb == null)
 		{
 			Debug.LogError("Rigidbody not found on bullet prefab.");
@@ -74,5 +78,10 @@ public class PhysicalProjectile : MonoBehaviour, IProjectileType
 		yield return new WaitForSeconds(delay);
 		bullet.SetActive(false);
 		bulletPool.Enqueue(bullet);
+	}
+	
+	private void TargetHit(GameObject gameobject)
+	{
+		OnTargetHitUnityEvent?.Invoke();
 	}
 }

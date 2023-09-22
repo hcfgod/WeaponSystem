@@ -44,6 +44,14 @@ public class WeaponManager : MonoBehaviour
 	{
 		if (CurrentWeapon is BaseGun gun)
 		{
+			if(gun.GetCurrentAmmoBehaviour() is RealisticAmmoBehavior realisticAmmoBehaviour)
+			{
+				if (Input.GetKeyDown(KeyCode.C))
+				{
+					realisticAmmoBehaviour.ChamberRound();
+				}
+			}
+			
 			if (gun.FireModeEnum == EFireMode.Auto)
 			{
 				if (Input.GetMouseButton(0))

@@ -5,7 +5,6 @@ using UnityEngine.Events;
 
 public class Bullet : MonoBehaviour
 {
-	public UnityEvent2 OnTargetHitUnityEvent;
 	public delegate void TargetHitEventHandler(GameObject target);
 	
 	public event TargetHitEventHandler OnTargetHit;
@@ -27,13 +26,9 @@ public class Bullet : MonoBehaviour
 			return; // We hit ourselves or a child object, so return
 		}
 		
-		// We hit something
-		Debug.Log("Hit: " + other.name);
-		
 		bulletRigidBody.velocity = Vector3.zero;
 		gameObject.SetActive(false);
 		
-		OnTargetHit?.DynamicInvoke();
-		OnTargetHitUnityEvent?.Invoke();
+		OnTargetHit?.DynamicInvoke(other.gameObject);
 	}
 }

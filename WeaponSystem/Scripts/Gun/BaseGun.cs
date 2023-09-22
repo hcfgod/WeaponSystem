@@ -197,11 +197,10 @@ public class BaseGun : BaseWeapon
 		{
 			_ammoBehavior = ComponentUtils.AddOrGetComponent<RealisticAmmoBehavior>(gameObject);
 		}
-		// Uncomment these lines when you have the corresponding classes
-		// else if (expectedType == typeof(CallOfDuty))
-		// {
-		//     _firingMode = AddOrGetComponent<Burst>();
-		// }
+		else if (expectedType == typeof(CallOfDutyAmmoBehavior))
+		{
+			_ammoBehavior = ComponentUtils.AddOrGetComponent<CallOfDutyAmmoBehavior>(gameObject);
+		}
 		else
 		{
 			Debug.LogError("Unsupported Ammo Behaviour: " + AmmoBehaviorEnum);
@@ -246,11 +245,16 @@ public class BaseGun : BaseWeapon
 				return typeof(RealisticAmmoBehavior);
 			
 			case EAmmoBehavior.CallOfDuty:
-				//return typeof(RealisticAmmo);
+				return typeof(CallOfDutyAmmoBehavior);
 				
 			default:
 				return null;
 		}
+	}
+	
+	public IAmmoBehavior GetCurrentAmmoBehaviour()
+	{
+		return _ammoBehavior;
 	}
 	
 	#endregion
