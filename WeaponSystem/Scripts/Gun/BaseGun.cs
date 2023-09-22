@@ -8,6 +8,8 @@ public enum EProjectileType { Raycast, Projectile };
 	
 public enum EFireMode { Single, Burst, Auto };
 
+public enum EAimingMode { FirstPerson, ThirdPerson };
+
 public enum EAmmoBehavior { Realistic, CallOfDuty };
 
 public class BaseGun : BaseWeapon
@@ -25,21 +27,27 @@ public class BaseGun : BaseWeapon
 	
 	public EProjectileType ProjectileTypeEnum = EProjectileType.Raycast;
 	public EFireMode FireModeEnum = EFireMode.Single;
+	public EAimingMode AimingModeEnum = EAimingMode.FirstPerson;
 	public EAmmoBehavior AmmoBehaviorEnum = EAmmoBehavior.Realistic;
 		
 	private EFireMode _previousFireModeEnum;
 	private EProjectileType _previousProjectileTypeEnum;
+	private EAimingMode _previousAimingModeEnum;
 	private EAmmoBehavior _previousAmmoBehaviorEnum;
 	
-	protected IProjectileType _projectileType;
-	protected IFiringMode _firingMode;
-	protected IAmmoBehavior _ammoBehavior;
+	private IProjectileType _projectileType;
+	private IFiringMode _firingMode;
+	private IAimingMode _aimingMode;
+	private IAmmoBehavior _ammoBehavior;
 	public IAmmoBehavior AmmoBehavior { get { return _ammoBehavior; } }
+	
+	#region UnityMethods
 	
 	private void Awake()
 	{
 		InitializeFiringMode();
 		InitializeProjectileType();
+		InitializeAimingMode();
 		InitializeAmmoBehaviour();
 	}
 	
@@ -57,12 +65,20 @@ public class BaseGun : BaseWeapon
 			_previousProjectileTypeEnum = ProjectileTypeEnum;
 		}
 		
+		if(AimingModeEnum != _previousAimingModeEnum)
+		{
+			InitializeAimingMode();
+			_previousAimingModeEnum = AimingModeEnum;
+		}
+		
 		if (AmmoBehaviorEnum != _previousAmmoBehaviorEnum)
 		{
 			InitializeAmmoBehaviour();
 			_previousAmmoBehaviorEnum = AmmoBehaviorEnum;
 		}
 	}
+	
+	#endregion
 
 	public override void Attack()
 	{
@@ -99,8 +115,39 @@ public class BaseGun : BaseWeapon
 		OnWeaponFireModeSwitchedEvent?.DynamicInvoke();
 		OnWeaponFireModeSwitched?.Invoke();
 	}
+
+	public void Aim()
+	{
+		if (_aimingMode != null)
+		{
+			_aimingMode.Aim();
+		}
+	}
+
+	public void StopAiming()
+	{
+		if (_aimingMode != null)
+		{
+			_aimingMode.StopAiming();
+		}
+	}
 	
 	#region Util Methods
+	
+	public void SetAimingMode(IAimingMode mode)
+	{
+		this._aimingMode = mode;
+	}
+	
+	public IAmmoBehavior GetCurrentAmmoBehaviour()
+	{
+		return _ammoBehavior;
+	}
+	
+	public IAimingMode GetCurrentAimingMode()
+	{
+		return _aimingMode;
+	}
 	
 	private void InitializeProjectileType()
 	{				
@@ -173,6 +220,41 @@ public class BaseGun : BaseWeapon
 		}
 
 		ComponentUtils.RemoveDuplicateComponents<IFiringMode>(gameObject);
+	}
+	
+	private void InitializeAimingMode()
+	{
+		System.Type expectedType = GetAimingModeFromEnum();
+
+		// Remove components that don't match the enum
+		foreach (MonoBehaviour component in GetComponents<MonoBehaviour>())
+		{
+			if (component is IAimingMode && component.GetType() != expectedType)
+			{
+	            #if UNITY_EDITOR
+				DestroyImmediate(component);
+	            #else
+				Destroy(component);
+	            #endif
+			}
+		}
+
+		// Initialize AimingMode based on the enum
+		if (expectedType == typeof(FirstPersonAiming))
+		{
+			_aimingMode = ComponentUtils.AddOrGetComponent<FirstPersonAiming>(gameObject);
+		}
+		// Uncomment these lines when you have the corresponding classes
+		// else if (expectedType == typeof(AimingMode))
+		// {
+		//     _aimingMode = AddOrGetComponent<AimingMode>();
+		// }
+		else
+		{
+			Debug.LogError("Unsupported AimingMode: " + AimingModeEnum);
+		}
+
+		ComponentUtils.RemoveDuplicateComponents<IAimingMode>(gameObject);
 	}
 	
 	private void InitializeAmmoBehaviour()
@@ -252,9 +334,19 @@ public class BaseGun : BaseWeapon
 		}
 	}
 	
-	public IAmmoBehavior GetCurrentAmmoBehaviour()
+	private Type GetAimingModeFromEnum()
 	{
-		return _ammoBehavior;
+		switch (AimingModeEnum)
+		{
+		case EAimingMode.FirstPerson:
+			return typeof(FirstPersonAiming);
+			
+		case EAimingMode.ThirdPerson:
+			//return typeof(CallOfDutyAmmoBehavior);
+				
+		default:
+			return null;
+		}
 	}
 	
 	#endregion

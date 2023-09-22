@@ -44,14 +44,6 @@ public class WeaponManager : MonoBehaviour
 	{
 		if (CurrentWeapon is BaseGun gun)
 		{
-			if(gun.GetCurrentAmmoBehaviour() is RealisticAmmoBehavior realisticAmmoBehaviour)
-			{
-				if (Input.GetKeyDown(KeyCode.C))
-				{
-					realisticAmmoBehaviour.ChamberRound();
-				}
-			}
-			
 			if (gun.FireModeEnum == EFireMode.Auto)
 			{
 				if (Input.GetMouseButton(0))
@@ -67,9 +59,29 @@ public class WeaponManager : MonoBehaviour
 				}
 			}
 			
+			// Aim when the right mouse button is pressed
+			if (Input.GetMouseButtonDown(1))
+			{
+				gun.GetCurrentAimingMode().Aim();
+			}
+			
+			// Stop aiming when the right mouse button is released
+			else if (Input.GetMouseButtonUp(1))
+			{
+				gun.GetCurrentAimingMode().StopAiming();
+			}
+			
 			if(Input.GetKeyDown(KeyCode.R))
 			{
 				gun.AmmoBehavior.Reload();
+			}
+			
+			if(gun.GetCurrentAmmoBehaviour() is RealisticAmmoBehavior realisticAmmoBehaviour)
+			{
+				if (Input.GetKeyDown(KeyCode.C))
+				{
+					realisticAmmoBehaviour.ChamberRound();
+				}
 			}
 		}
 	}
