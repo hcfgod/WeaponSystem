@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   reloadTime: 0.3
   magazineSize: 7
-  fireRate: 12
+  fireRate: 11.67

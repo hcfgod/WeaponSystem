@@ -43,11 +43,25 @@ public class CallOfDutyAmmoBehavior : MonoBehaviour, IAmmoBehavior
 		// Simulate reload time
 		yield return new WaitForSeconds(ammoBehaviorData.ReloadTime);
 
-		int ammoNeeded = ammoBehaviorData.MagSize - _currentAmmoInMagazine;
+		LoadMagazineFromReserve();
+	}
+	
+	public void AddAmmoToReserve(int amount)
+	{
+		_currentReserveAmmo += amount;
+		if (_currentReserveAmmo > _reserveAmmoCapacity)
+		{
+			_currentReserveAmmo = _reserveAmmoCapacity;
+		}
+	}
+
+	public void LoadMagazineFromReserve()
+	{
+		int ammoNeeded = _magazineCapacity - _currentAmmoInMagazine;
 
 		if (_currentReserveAmmo >= ammoNeeded)
 		{
-			_currentAmmoInMagazine = ammoBehaviorData.MagSize;
+			_currentAmmoInMagazine = _magazineCapacity;
 			_currentReserveAmmo -= ammoNeeded;
 		}
 		else

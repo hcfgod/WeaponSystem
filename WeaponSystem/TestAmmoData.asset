@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 306e0d464ce267e4995e823239b178aa, type: 3}
   m_Name: TestAmmoData
   m_EditorClassIdentifier: 
-  MaxAmmo: 200
-  MagSize: 50
+  MaxAmmo: 132
+  MagSize: 32
   ReloadTime: 0.5
+  ChamberingDelay: 0.0171

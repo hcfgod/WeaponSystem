@@ -14,9 +14,9 @@ public class BaseGun : BaseWeapon
 {
 	#region Events
 	
-	public UnityEvent2 OnWeaponFireModeSwitchedUnityEvent;	
+	public UnityEvent2 OnWeaponFireModeSwitched;	
 	public delegate void WeaponFireModeSwitched();
-	public event WeaponFireModeSwitched OnWeaponFireModeSwitched;
+	public event WeaponFireModeSwitched OnWeaponFireModeSwitchedEvent;
 	
 	#endregion
 	
@@ -96,8 +96,8 @@ public class BaseGun : BaseWeapon
 		FireModeEnum = newFireMode;
 		InitializeFiringMode();
 		
-		OnWeaponFireModeSwitched?.DynamicInvoke();
-		OnWeaponFireModeSwitchedUnityEvent?.Invoke();
+		OnWeaponFireModeSwitchedEvent?.DynamicInvoke();
+		OnWeaponFireModeSwitched?.Invoke();
 	}
 	
 	#region Util Methods

@@ -6,4 +6,5 @@ public class AmmoBehaviorData : ScriptableObject
 	public int MaxAmmo; // Maximum ammo capacity
 	public int MagSize; // Magazine size
 	public float ReloadTime;
+	public float ChamberingDelay;
 }

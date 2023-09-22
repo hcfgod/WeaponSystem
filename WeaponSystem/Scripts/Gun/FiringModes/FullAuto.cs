@@ -7,9 +7,9 @@ public class FullAuto : MonoBehaviour, IFiringMode
 {
 	#region Events
 
-	public UnityEvent2 OnWeaponFiredUnityEvent;
+	public UnityEvent2 OnWeaponFired;
 	public delegate void WeaponFiredEventHandler();
-	public event WeaponFiredEventHandler OnWeaponFired;
+	public event WeaponFiredEventHandler OnWeaponFiredEvent;
 	
 	#endregion
 	
@@ -25,8 +25,8 @@ public class FullAuto : MonoBehaviour, IFiringMode
 			// Update the next fire time
 			nextFireTime = Time.time + 1f / gunData.fireRate;
 			
-			OnWeaponFired?.DynamicInvoke();
-			OnWeaponFiredUnityEvent?.Invoke();
+			OnWeaponFiredEvent?.DynamicInvoke();
+			OnWeaponFired?.Invoke();
 		}
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class RealisticAmmoBehavior : MonoBehaviour, IAmmoBehavior
 {
@@ -9,69 +10,66 @@ public class RealisticAmmoBehavior : MonoBehaviour, IAmmoBehavior
 	[SerializeField] private List<EAmmoType> supportedAmmoTypes;
 	[SerializeField] private EAmmoType currentAmmoType;
 	
+	[SerializeField] private bool _requiresManualBolting = false;
+	
 	private int _magazineCapacity;
 	private int _reserveAmmoCapacity;
 	
-	[SerializeField] private int _currentAmmoInMagazine;
-	[SerializeField] private int _currentReserveAmmo;
-	
-	private bool _isRoundChambered;
+	private int _currentAmmoInChamber;
+	private int _currentAmmoInMagazine;
+	private int _currentReserveAmmo;
 
+	private bool _isChambering = false;
+	private bool _isRoundChambered = false;
+	
+	private bool isReloading = false;
+
+	#region Events
+
+	public UnityEvent2 OnRoundChambered;
+	public delegate void RoundChamberedEventHandler();
+	public event RoundChamberedEventHandler OnRoundChamberedEvent;
+	
+	#endregion
+	
 	private void Start()
 	{
 		_magazineCapacity = ammoBehaviorData.MagSize;
 		_reserveAmmoCapacity = ammoBehaviorData.MaxAmmo;
 		
 		_currentAmmoInMagazine = _magazineCapacity;
-		_reserveAmmoCapacity = _reserveAmmoCapacity;
-		_isRoundChambered = true;
+		_currentReserveAmmo = _reserveAmmoCapacity;
 	}
 
 	public bool CanShoot()
 	{
-		if (_currentAmmoInMagazine > 0 && _isRoundChambered)
-		{
-			return true;
-		}
-		else
-		{
-			_isRoundChambered = false;
-			return false;
-		}
+		if(_isChambering) return false;
+
+		if(!_isRoundChambered) return false;
+		
+		if(isReloading) return false;
+		
+		return true;
 	}
 
 	public void ConsumeAmmo()
 	{
-		if (_currentAmmoInMagazine > 0)
+		if (_isRoundChambered)
 		{
-			_currentAmmoInMagazine--;
+			_currentAmmoInChamber--;
+			_isRoundChambered = false;
+			
+			if(!_requiresManualBolting)
+				ChamberRound();
 		}
 	}
 
 	public void Reload()
 	{
+		if(_currentReserveAmmo <= 0) return;
+			
 		StartCoroutine(ReloadRoutine());
-	}
-	
-	private IEnumerator ReloadRoutine()
-	{
-		// Simulate reload time
-		yield return new WaitForSeconds(ammoBehaviorData.ReloadTime);
-
-		int ammoNeeded = _magazineCapacity - _currentAmmoInMagazine;
-
-		if (_currentReserveAmmo >= ammoNeeded)
-		{
-			_currentAmmoInMagazine = _magazineCapacity;
-			_currentReserveAmmo -= ammoNeeded;
-		}
-		else
-		{
-			_currentAmmoInMagazine += _currentReserveAmmo;
-			_currentReserveAmmo = 0;
-		}
-
-		_isRoundChambered = false;
+		isReloading = true;
 	}
 	
 	public void ChangeAmmoType(EAmmoType newAmmoType)
@@ -89,14 +87,62 @@ public class RealisticAmmoBehavior : MonoBehaviour, IAmmoBehavior
 	
 	public void ChamberRound()
 	{
-		if (!_isRoundChambered && _currentAmmoInMagazine > 0)
+		StartCoroutine(ChamberRoundRoutine());
+	}
+	
+	public void AddAmmoToReserve(int amount)
+	{
+		_currentReserveAmmo += amount;
+		
+		if (_currentReserveAmmo > _reserveAmmoCapacity)
 		{
-			_isRoundChambered = true;
-			_currentAmmoInMagazine--;  // One round is moved from the magazine to the chamber
+			_currentReserveAmmo = _reserveAmmoCapacity;
+		}
+	}
+
+	public void LoadMagazineFromReserve()
+	{
+		int ammoNeeded = _magazineCapacity - _currentAmmoInMagazine;
+
+		if (_currentReserveAmmo >= ammoNeeded)
+		{
+			_currentAmmoInMagazine = _magazineCapacity;
+			_currentReserveAmmo -= ammoNeeded;
 		}
 		else
 		{
-			Debug.LogWarning("Cannot chamber a round.");
+			_currentAmmoInMagazine += _currentReserveAmmo;
+			_currentReserveAmmo = 0;
 		}
+	}
+	
+	private IEnumerator ChamberRoundRoutine()
+	{
+		_isChambering = true;
+		
+		yield return new WaitForSeconds(ammoBehaviorData.ChamberingDelay);
+		
+		if (!_isRoundChambered && _currentAmmoInMagazine > 0)
+		{
+			_currentAmmoInMagazine--;
+			_currentAmmoInChamber++;
+        
+			_isRoundChambered = true;
+			
+			OnRoundChambered?.Invoke();
+			OnRoundChamberedEvent?.DynamicInvoke();
+		}
+
+		_isChambering = false;
+	}
+	
+	private IEnumerator ReloadRoutine()
+	{
+		yield return new WaitForSeconds(ammoBehaviorData.ReloadTime);
+
+		LoadMagazineFromReserve();
+		
+		_isRoundChambered = false;
+		isReloading = false;
 	}
 }
