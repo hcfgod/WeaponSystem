@@ -1,9 +1,19 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.Events;
 
 public class CallOfDutyAmmoBehavior : MonoBehaviour, IAmmoBehavior
 {
+	public UnityEvent2 OnReloadStarted;
+	public UnityEvent2 OnReloadFinished;
+	
+	public delegate void OnReloadStartEventHandler();
+	public delegate void OnReloadFinishedEventHandler();
+	public event OnReloadStartEventHandler OnReloadStartedEvent;
+	public event OnReloadFinishedEventHandler OnReloadFinishedEvent;
+	
 	[SerializeField] private AmmoBehaviorData ammoBehaviorData;
+	[SerializeField] private GunData gunData;
 
 	private int _magazineCapacity;
 	private int _reserveAmmoCapacity;
@@ -22,7 +32,14 @@ public class CallOfDutyAmmoBehavior : MonoBehaviour, IAmmoBehavior
 
 	public bool CanShoot()
 	{
-		return _currentAmmoInMagazine > 0;
+		if(_currentAmmoInMagazine <= 0)
+		{
+			gunData.isGunMagEmpty = true;
+			return true;
+		}
+		
+		gunData.isGunMagEmpty = false;
+		return true;
 	}
 
 	public void ConsumeAmmo()
@@ -35,15 +52,28 @@ public class CallOfDutyAmmoBehavior : MonoBehaviour, IAmmoBehavior
 
 	public void Reload()
 	{
+		AudioManager.instance.PlaySFX(gunData.reloadAudiop1, 0.5f, false);
+		
+		OnReloadStarted?.Invoke();
+		OnReloadStartedEvent?.DynamicInvoke();
+		
 		StartCoroutine(ReloadRoutine());
 	}
 	
 	public IEnumerator ReloadRoutine()
 	{
-		// Simulate reload time
-		yield return new WaitForSeconds(ammoBehaviorData.ReloadTime);
+		yield return new WaitForSeconds(ammoBehaviorData.reloadDelayForSecondPartOfAudio);
+		
+		AudioManager.instance.PlaySFX(gunData.reloadAudiop2, 0.5f, false);
+		
+		float timeLeftToWait = ammoBehaviorData.ReloadTime - ammoBehaviorData.reloadDelayForSecondPartOfAudio;
+				
+		yield return new WaitForSeconds(timeLeftToWait);
 
 		LoadMagazineFromReserve();
+
+		OnReloadFinished?.Invoke();
+		OnReloadFinishedEvent?.DynamicInvoke();
 	}
 	
 	public void AddAmmoToReserve(int amount)

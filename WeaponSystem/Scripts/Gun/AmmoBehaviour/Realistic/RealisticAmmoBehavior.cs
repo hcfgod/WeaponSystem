@@ -30,6 +30,14 @@ public class RealisticAmmoBehavior : MonoBehaviour, IAmmoBehavior
 	public delegate void RoundChamberedEventHandler();
 	public event RoundChamberedEventHandler OnRoundChamberedEvent;
 	
+	public UnityEvent2 OnReloadStarted;
+	public UnityEvent2 OnReloadFinished;
+	
+	public delegate void OnReloadStartEventHandler();
+	public delegate void OnReloadFinishedEventHandler();
+	public event OnReloadStartEventHandler OnReloadStartedEvent;
+	public event OnReloadFinishedEventHandler OnReloadFinishedEvent;
+	
 	#endregion
 	
 	private void Start()
@@ -67,9 +75,13 @@ public class RealisticAmmoBehavior : MonoBehaviour, IAmmoBehavior
 	public void Reload()
 	{
 		if(_currentReserveAmmo <= 0) return;
-			
-		StartCoroutine(ReloadRoutine());
+		
 		isReloading = true;
+		
+		StartCoroutine(ReloadRoutine());
+
+		OnReloadStarted?.Invoke();
+		OnReloadStartedEvent?.DynamicInvoke();
 	}
 	
 	public void ChangeAmmoType(EAmmoType newAmmoType)
@@ -87,6 +99,9 @@ public class RealisticAmmoBehavior : MonoBehaviour, IAmmoBehavior
 	
 	public void ChamberRound()
 	{
+		if(isReloading)
+			return;
+			
 		StartCoroutine(ChamberRoundRoutine());
 	}
 	
@@ -144,5 +159,13 @@ public class RealisticAmmoBehavior : MonoBehaviour, IAmmoBehavior
 		
 		_isRoundChambered = false;
 		isReloading = false;
+		
+		OnReloadFinished?.Invoke();
+		OnReloadFinishedEvent?.DynamicInvoke();
+	}
+	
+	public bool GetIsReloading()
+	{
+		return isReloading;
 	}
 }

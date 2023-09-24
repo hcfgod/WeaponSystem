@@ -3,6 +3,12 @@ using UnityEngine.Events;
 
 public abstract class BaseWeapon : MonoBehaviour, IWeapon
 {
+	[Space(10)]
+	
+	public WeaponData WeaponDataRef;
+	
+	[Space(10)]
+	
 	#region Events
 	
 	public UnityEvent2 OnWeaponEquipped;
@@ -17,8 +23,6 @@ public abstract class BaseWeapon : MonoBehaviour, IWeapon
 	
 	#endregion
 	
-	public WeaponData WeaponDataRef;
-
 	public virtual void Attack(){}
 
 	public virtual void Equip()

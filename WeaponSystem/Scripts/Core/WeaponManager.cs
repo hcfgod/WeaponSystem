@@ -5,8 +5,12 @@ using System;
 
 public class WeaponManager : MonoBehaviour
 {
+	[SerializeField] PlayerData playerData;
+	
 	public IWeapon CurrentWeapon { get; set; }
-
+	
+	private WeaponAnimator _gunAnimator;
+	
 	private void Start()
 	{
 		// Temp Setting The Current Weapon To A Test Weapon For Testing Purposes
@@ -23,6 +27,13 @@ public class WeaponManager : MonoBehaviour
 		CurrentWeapon?.Unequip();
 		CurrentWeapon = newWeapon;
 		CurrentWeapon.Equip();
+		
+		if(CurrentWeapon is BaseGun gun)
+		{
+			_gunAnimator = gun.gameObject.GetComponentInChildren<WeaponAnimator>();
+
+			_gunAnimator.GunData = gun.GunDataRef;
+		}
 	}
 
 	public void FireCurrentWeapon()
@@ -43,7 +54,7 @@ public class WeaponManager : MonoBehaviour
 	private void HandleGunInput()
 	{
 		if (CurrentWeapon is BaseGun gun)
-		{
+		{	
 			if (gun.FireModeEnum == EFireMode.Auto)
 			{
 				if (Input.GetMouseButton(0))
@@ -60,20 +71,24 @@ public class WeaponManager : MonoBehaviour
 			}
 			
 			// Aim when the right mouse button is pressed
-			if (Input.GetMouseButtonDown(1))
+			if (Input.GetMouseButton(1))
 			{
-				gun.GetCurrentAimingMode().Aim();
+				if(!playerData.canAim)
+					return;
+					
+				gun.Aim();
 			}
-			
-			// Stop aiming when the right mouse button is released
-			else if (Input.GetMouseButtonUp(1))
+			else
 			{
-				gun.GetCurrentAimingMode().StopAiming();
+				if(!playerData.canAim)
+					return;
+					
+				gun.StopAiming();
 			}
-			
+
 			if(Input.GetKeyDown(KeyCode.R))
 			{
-				gun.AmmoBehavior.Reload();
+				gun.Reload();
 			}
 			
 			if(gun.GetCurrentAmmoBehaviour() is RealisticAmmoBehavior realisticAmmoBehaviour)

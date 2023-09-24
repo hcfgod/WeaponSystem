@@ -22,6 +22,8 @@ public class BaseGun : BaseWeapon
 	
 	#endregion
 	
+	[Space(10)]
+	
 	public GunData GunDataRef;
 	public AmmoBehaviorData AmmoBehaviorDataRef;
 	
@@ -121,6 +123,15 @@ public class BaseGun : BaseWeapon
 		if (_aimingMode != null)
 		{
 			_aimingMode.Aim();
+			GunDataRef.isAiming = true;
+		}
+	}
+	
+	public void Reload()
+	{
+		if (_ammoBehavior != null)
+		{
+			_ammoBehavior.Reload();
 		}
 	}
 
@@ -129,10 +140,9 @@ public class BaseGun : BaseWeapon
 		if (_aimingMode != null)
 		{
 			_aimingMode.StopAiming();
+			GunDataRef.isAiming = false;
 		}
 	}
-	
-	#region Util Methods
 	
 	public void SetAimingMode(IAimingMode mode)
 	{
@@ -149,6 +159,8 @@ public class BaseGun : BaseWeapon
 		return _aimingMode;
 	}
 	
+	#region Util Methods
+		
 	private void InitializeProjectileType()
 	{				
 		System.Type expectedType = GetProjectileTypeFromEnum();
@@ -209,11 +221,6 @@ public class BaseGun : BaseWeapon
 		 {
 			_firingMode = ComponentUtils.AddOrGetComponent<FullAuto>(gameObject);
 		 }
-		// Uncomment these lines when you have the corresponding classes
-		// else if (expectedType == typeof(Burst))
-		// {
-		//     _firingMode = AddOrGetComponent<Burst>();
-		// }
 		else
 		{
 			Debug.LogError("Unsupported FireMode: " + FireModeEnum);
@@ -244,11 +251,6 @@ public class BaseGun : BaseWeapon
 		{
 			_aimingMode = ComponentUtils.AddOrGetComponent<FirstPersonAiming>(gameObject);
 		}
-		// Uncomment these lines when you have the corresponding classes
-		// else if (expectedType == typeof(AimingMode))
-		// {
-		//     _aimingMode = AddOrGetComponent<AimingMode>();
-		// }
 		else
 		{
 			Debug.LogError("Unsupported AimingMode: " + AimingModeEnum);
@@ -299,8 +301,6 @@ public class BaseGun : BaseWeapon
 			return typeof(FullAuto);
 		case EFireMode.Single:
 			return typeof(SingleShot);
-		case EFireMode.Burst:
-			//return typeof(Burst);
 		default:
 			return null;
 		}
